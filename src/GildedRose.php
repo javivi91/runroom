@@ -4,17 +4,21 @@ namespace Runroom\GildedRose;
 
 class GildedRose
 {
+    const LIMIT_LEVEL_1 = 6;
+    const LIMIT_LEVEL_2 = 11;
+    const MAX_SELL_IN = 0;
+
     private $items;
 
-    function __construct($items)
+    public function __construct($items)
     {
         $this->items = $items;
     }
 
-    function update_quality()
+    public function updateQuality()
     {
         foreach ($this->items as $item) {
-            if ($item->getName() != 'Aged Brie' and $item->getName() != 'Backstage passes to a TAFKAL80ETC concert') {
+            if ($item->getName() != 'Aged Brie' && $item->getName() != 'Backstage passes to a TAFKAL80ETC concert') {
                 if ($item->getName() != 'Sulfuras, Hand of Ragnaros') {
                     $item->reduceQuality();
                 }
@@ -22,10 +26,10 @@ class GildedRose
                 if ($item->getQuality() < 50) {
                     $item->setQuality($item->getQuality() + 1);
                     if ($item->getName() == 'Backstage passes to a TAFKAL80ETC concert') {
-                        if ($item->getSellIn() < 11) {
+                        if ($item->getSellIn() < self::LIMIT_LEVEL_2) {
                             $item->increaseQuality();
                         }
-                        if ($item->getSellIn() < 6) {
+                        if ($item->getSellIn() < self::LIMIT_LEVEL_1) {
                             $item->increaseQuality();
                         }
                     }
@@ -36,7 +40,7 @@ class GildedRose
                 $item->reduceSellIn();
             }
 
-            if ($item->getSellIn() < 0) {
+            if ($item->getSellIn() < self::MAX_SELL_IN) {
                 if ($item->getName() != 'Aged Brie') {
                     if ($item->getName() != 'Backstage passes to a TAFKAL80ETC concert') {
                         if ($item->getName() != 'Sulfuras, Hand of Ragnaros') {
