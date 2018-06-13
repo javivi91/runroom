@@ -2,61 +2,85 @@
 
 namespace Runroom\GildedRose;
 
-class GildedRose {
+class GildedRose
+{
+    const SELLIN_LIMIT_0 = 0;
+    const SELLIN_LIMIT_1 = 5;
+    const SELLIN_LIMIT_2 = 10;
 
     private $items;
 
-    function __construct($items) {
+    public function __construct($items)
+    {
         $this->items = $items;
     }
 
-    function update_quality() {
+    /**
+     * Update quality of items
+     */
+    public function updateQuality()
+    {
         foreach ($this->items as $item) {
-            if ($item->name != 'Aged Brie' and $item->name != 'Backstage passes to a TAFKAL80ETC concert') {
-                if ($item->quality > 0) {
-                    if ($item->name != 'Sulfuras, Hand of Ragnaros') {
-                        $item->quality = $item->quality - 1;
-                    }
-                }
-            } else {
-                if ($item->quality < 50) {
-                    $item->quality = $item->quality + 1;
-                    if ($item->name == 'Backstage passes to a TAFKAL80ETC concert') {
-                        if ($item->sell_in < 11) {
-                            if ($item->quality < 50) {
-                                $item->quality = $item->quality + 1;
-                            }
-                        }
-                        if ($item->sell_in < 6) {
-                            if ($item->quality < 50) {
-                                $item->quality = $item->quality + 1;
-                            }
-                        }
-                    }
-                }
+            switch ($item->getName()) {
+                case 'Sulfuras, Hand of Ragnaros':
+                    break;
+                case 'Aged Brie':
+                    $this->updateAgedQuality($item);
+                    break;
+                case 'Backstage passes to a TAFKAL80ETC concert':
+                    $this->updateBackstageQuality($item);
+                    break;
+                default:
+                    $this->updateDefaultQuality($item);
+                    break;
             }
+        }
+    }
 
-            if ($item->name != 'Sulfuras, Hand of Ragnaros') {
-                $item->sell_in = $item->sell_in - 1;
-            }
+    /**
+     * Update quality of 'Aged Brie' item
+     */
+    private function updateAgedQuality($item)
+    {
+        $item->reduceSellIn();
 
-            if ($item->sell_in < 0) {
-                if ($item->name != 'Aged Brie') {
-                    if ($item->name != 'Backstage passes to a TAFKAL80ETC concert') {
-                        if ($item->quality > 0) {
-                            if ($item->name != 'Sulfuras, Hand of Ragnaros') {
-                                $item->quality = $item->quality - 1;
-                            }
-                        }
-                    } else {
-                        $item->quality = $item->quality - $item->quality;
-                    }
-                } else {
-                    if ($item->quality < 50) {
-                        $item->quality = $item->quality + 1;
-                    }
-                }
-            }
+        if ($item->getSellIn() < self::SELLIN_LIMIT_0) {
+            $item->increaseQuality(2);
+        } else {
+            $item->increaseQuality();
+        }
+    }
+
+    /**
+     * Update quality of 'Backstage TAFKAL80ETC' item
+     */
+    private function updateBackstageQuality($item)
+    {
+        $item->reduceSellIn();
+
+        if ($item->getSellIn() < self::SELLIN_LIMIT_0) {
+            $item->setQuality(0);
+        } elseif ($item->getSellIn() < self::SELLIN_LIMIT_1) {
+            $item->increaseQuality(3);
+        } elseif ($item->getSellIn() < self::SELLIN_LIMIT_2) {
+            $item->increaseQuality(2);
+        } else {
+            $item->increaseQuality();
+        }
+
+    }
+
+    /**
+     * Update quality of default item
+     */
+    private function updateDefaultQuality($item)
+    {
+        $item->reduceSellIn();
+
+        if ($item->getSellIn() < self::SELLIN_LIMIT_0) {
+            $item->reduceQuality(2);
+        } else {
+            $item->reduceQuality();
         }
     }
 }
